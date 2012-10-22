@@ -85,8 +85,12 @@ namespace Galaxies
 			renderView = new RenderTargetView(device, backBuffer);
 
 			//// Compile Vertex and Pixel shaders
-			CompilationResult effectByteCode = ShaderBytecode.CompileFromFile("MiniTri.fx", "fx_5_0", ShaderFlags.None, EffectFlags.None);
-			effect = new Effect(device, effectByteCode);
+#if DEBUG
+            CompilationResult effectByteCode = ShaderBytecode.CompileFromFile("MiniTri.fx", "fx_5_0", ShaderFlags.Debug | ShaderFlags.SkipOptimization | ShaderFlags.WarningsAreErrors /*| ShaderFlags.ForcePsSoftwareNoOpt*/, EffectFlags.None);
+#else
+            CompilationResult effectByteCode = ShaderBytecode.CompileFromFile("MiniTri.fx", "fx_5_0", ShaderFlags.None, EffectFlags.None);
+#endif
+            effect = new Effect(device, effectByteCode);
 			//EffectTechnique technique = effect.GetTechniqueByIndex(0);
 			technique = effect.GetTechniqueByName("Render");
 			// Compile Vertex and Pixel shaders
