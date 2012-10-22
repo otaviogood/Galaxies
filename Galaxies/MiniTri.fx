@@ -46,7 +46,7 @@ PS_IN VS2( VS_IN input )
 {
 	PS_IN output = (PS_IN)0;
 	//input.pos.w = 1.0f;
-	float scale = 1.02f;
+	float scale = 1.06f;
 	//output.pos = mul( float4(input.pos.x*scale, input.pos.y*scale, input.pos.z*scale, 1), worldMat );
 	output.pos = mul( float4(input.pos.x*scale, input.pos.y*scale, input.pos.z*scale, 1), worldMat );
 	output.pos = mul( output.pos, viewMat );
@@ -85,7 +85,7 @@ float4 PS2( PS_IN input ) : SV_Target
 	float3 camTrans = mul(cameraPos, transpose(worldMat)).xyz;
 	float3 eyeVec = normalize(input.worldPos - camTrans.xyz);
 	float3 intersectA, intersectB;
-	IntersectSphereAndRay(float3(0,0,0), 1.02f, camTrans.xyz, camTrans.xyz + eyeVec, intersectA, intersectB);
+	IntersectSphereAndRay(float3(0,0,0), 1.06f, camTrans.xyz, camTrans.xyz + eyeVec, intersectA, intersectB);
 	float3 innerA, innerB;
 	IntersectSphereAndRay(float3(0,0,0), 1.0f, camTrans.xyz, camTrans.xyz + eyeVec, innerA, innerB);
 	float light = dot(input.normal, sunPos.xyz);
@@ -97,7 +97,7 @@ float4 PS2( PS_IN input ) : SV_Target
 //finalColor = alpha.xxx-0.5f;
 //alpha = 1;
 	finalColor *= 0.5f;
-	return float4(finalColor.x, finalColor.y, finalColor.z, alpha);
+	return float4(finalColor.x, finalColor.y, finalColor.z, alpha * alpha);
 }
 
 float4 PS( PS_IN input ) : SV_Target
