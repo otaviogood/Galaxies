@@ -15,37 +15,33 @@ namespace Galaxies
 {
     internal static class Program
     {
-        [STAThread]
+		[STAThread]
         private static void Main()
         {
             RenderForm form = new RenderForm("Galaxies - test");
 			form.ClientSize = new System.Drawing.Size(800, 800);
+			form.MouseDown += new System.Windows.Forms.MouseEventHandler(form_MouseDown);
+			form.MouseUp += new System.Windows.Forms.MouseEventHandler(form_MouseUp);
+			form.MouseMove += new System.Windows.Forms.MouseEventHandler(form_MouseMove);
+			form.MouseWheel += new System.Windows.Forms.MouseEventHandler(form_MouseWheel);
 
+			Global._G.camera = new Camera(1, form.ClientSize.Width, form.ClientSize.Height);
 #if DEBUG
             Configuration.EnableObjectTracking = true;	// some sharpDX COM object tracking that slows performance.
 #endif
 
-
 			Global._G.InitDX(form);
 
 			Mesh mesh = new Mesh();
-			//mesh.GenCube();
 			mesh.MakeLatLonSphere2(64, 64);
 
 			// Prepare All the stages
 			Global._G.context.Rasterizer.SetViewports(new Viewport(0, 0, form.ClientSize.Width, form.ClientSize.Height, 0.0f, 1.0f));
 			Global._G.context.OutputMerger.SetTargets(Global._G.depthView, Global._G.renderView);
 
-			// Prepare matrices
-			var view = Matrix.LookAtLH(new Vector3(0, 0, -5), new Vector3(0, 0, 0), Vector3.UnitY);
-			var proj = Matrix.PerspectiveFovLH((float)Math.PI / 4.0f, form.ClientSize.Width / (float)form.ClientSize.Height, 0.1f, 100.0f);
-			var viewProj = Matrix.Multiply(view, proj);
-			Global._G.shaderParams.sunPos = new Vector4(0, 5, 0, 1);
-			Global._G.shaderParams.cameraPos = new Vector4(0, 0, -3, 1);
-			Global._G.shaderParams.view = Matrix.LookAtLH(new Vector3(0, 0, -3), new Vector3(0, 0, 0), Vector3.UnitY);
-			Global._G.shaderParams.proj = Matrix.PerspectiveFovLH((float)Math.PI / 4.0f, form.ClientSize.Width / (float)form.ClientSize.Height, 0.1f, 100.0f);
-			Global._G.shaderParams.view.Transpose();
-			Global._G.shaderParams.proj.Transpose();
+			Global._G.shaderParams.sunPos = new Vector4(Vector3.Normalize(new Vector3(1, 1, -1)), 1);
+			Global._G.shaderParams.sunColor = new Vector4(5, 4.7f, 3.75f, 1);
+			Global._G.camera.SetupCamera();
 
 
 			// Use clock
@@ -59,14 +55,10 @@ namespace Galaxies
 
 				// Clear views
 				Global._G.context.ClearDepthStencilView(Global._G.depthView, DepthStencilClearFlags.Depth, 1.0f, 0);
-				Global._G.context.ClearRenderTargetView(Global._G.renderView, Color.Black);
+				Global._G.context.ClearRenderTargetView(Global._G.renderView, SharpDX.Color.Black);
 
-				// Update WorldViewProj Matrix
-				var worldViewProj = Matrix.RotationX(time) * Matrix.RotationY(time * 2) * Matrix.RotationZ(time * .7f) * viewProj;
-				Global._G.shaderParams.world = Matrix.RotationX(time) *Matrix.RotationY(time * 2) * Matrix.RotationZ(time * .7f);
+				Global._G.shaderParams.world = Matrix.Identity;// Matrix.RotationX(time) * Matrix.RotationY(time * 2) * Matrix.RotationZ(time * .7f);
 				Global._G.shaderParams.world.Transpose();
-				worldViewProj.Transpose();
-				//Global._G.context.UpdateSubresource(ref worldViewProj, Global._G.constantBuffer);
 				Global._G.context.UpdateSubresource(ref Global._G.shaderParams, Global._G.constantBuffer);
 
 				// Draw the cube
@@ -79,6 +71,27 @@ namespace Galaxies
 			// Release all resources
 			Global._G.ShutdownDX();
 		}
+
+		static void form_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
+		{
+			Global._G.camera.MouseWheel(sender, e);
+		}
+
+		static void form_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+		{
+			Global._G.camera.MouseMove(sender, e);
+		}
+
+		static void form_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+		{
+			Global._G.camera.MouseUp(sender, e);
+		}
+
+		static void form_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+		{
+			Global._G.camera.MouseDown(sender, e);
+		}
+
     }
 }
 

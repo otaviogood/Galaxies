@@ -21,6 +21,7 @@ namespace Galaxies
 		public Matrix proj;
 		public Vector4 cameraPos;
 		public Vector4 sunPos;
+		public Vector4 sunColor;
 	}
 
 	public sealed class Global
@@ -46,6 +47,8 @@ namespace Galaxies
 		public EffectTechnique technique;
 
 		public ShaderParamStruct shaderParams;
+
+		public Camera camera;
 
 		private Global()
 		{
@@ -121,6 +124,16 @@ namespace Galaxies
 			});
 
 			depthView = new DepthStencilView(device, depthBuffer);
+			//RasterizerStateDescription rsd = new RasterizerStateDescription() { IsMultisampleEnabled = true };
+			//rsd.CullMode = CullMode.Back;
+			//rsd.FillMode = FillMode.Solid;
+			//rsd.IsMultisampleEnabled = true;
+			//rsd.IsAntialiasedLineEnabled = false;
+			//rsd.IsDepthClipEnabled = false;
+			//rsd.IsScissorEnabled = false;
+			//RasterizerState rs = new RasterizerState(device, rsd);
+			//device.ImmediateContext.Rasterizer.State = rs;
+			//rs.Dispose();
 
 		}
 

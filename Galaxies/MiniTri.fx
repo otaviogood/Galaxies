@@ -5,6 +5,7 @@ cbuffer MatrixBuffer
 	matrix projMat;
 	float4 cameraPos;
 	float4 sunPos;
+	float4 sunColor;
 }
 //Texture2D txDiffuse : register( t0 );
 Texture2D <float4> txDiffuse;
@@ -88,7 +89,7 @@ float4 PS2( PS_IN input ) : SV_Target
 	IntersectSphereAndRay(float3(0,0,0), 1.06f, camTrans.xyz, camTrans.xyz + eyeVec, intersectA, intersectB);
 	float3 innerA, innerB;
 	IntersectSphereAndRay(float3(0,0,0), 1.0f, camTrans.xyz, camTrans.xyz + eyeVec, innerA, innerB);
-	float light = dot(input.normal, sunPos.xyz);
+	float3 light = dot(input.normal, sunPos.xyz) * sunColor.xyz;
 	float temp = dot(input.normal, eyeVec);
 	float3 finalColor = float3(0.3f, 0.7f, 2.0f) * light;
 	//float alpha = 1.0f-temp.x;
@@ -102,7 +103,7 @@ float4 PS2( PS_IN input ) : SV_Target
 
 float4 PS( PS_IN input ) : SV_Target
 {
-	float light = dot(input.normal, sunPos.xyz);
+	float3 light = dot(input.normal, sunPos.xyz) * sunColor.xyz;
 	float3 tex = txDiffuse.Sample( mySampler, input.tex ).xyz;
 	//float3 finalColor = float3(0.3f, 0.6f, 0.99f) * tex;// * light;
 	float3 finalColor = lerp(float3(0.3f, 0.7f, 2.0f), tex, 0.9f) * light;
