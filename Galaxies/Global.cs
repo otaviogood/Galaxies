@@ -49,6 +49,8 @@ namespace Galaxies
 		public ShaderParamStruct shaderParams;
 
 		public Camera camera;
+		public TextureManager texMan;
+		public RenderForm form; 
 
 		private Global()
 		{
@@ -62,8 +64,8 @@ namespace Galaxies
             {
                 BufferCount = 1,
                 ModeDescription =
-                    new ModeDescription(form.ClientSize.Width, form.ClientSize.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm),
-                IsWindowed = true,
+					new ModeDescription(form.ClientSize.Width, form.ClientSize.Height, new Rational(60, 1), Format.R10G10B10A2_UNorm),//.R8G8B8A8_UNorm),
+				IsWindowed = true,
                 OutputHandle = form.Handle,
                 SampleDescription = new SampleDescription(1, 0),
                 SwapEffect = SwapEffect.Discard,
@@ -135,6 +137,9 @@ namespace Galaxies
 			//device.ImmediateContext.Rasterizer.State = rs;
 			//rs.Dispose();
 
+			depthBuffer.Dispose();
+
+			texMan = new TextureManager();
 		}
 
 		public void ShutdownDX()

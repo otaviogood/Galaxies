@@ -64,6 +64,8 @@
     <Compile Include="Math.cs" />
     <Compile Include="Mesh.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Texture.cs" />
+    <Compile Include="TextureManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="sharpdx_direct3d11_effects_x64.dll" />

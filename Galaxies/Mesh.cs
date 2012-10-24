@@ -29,8 +29,8 @@ namespace Galaxies
 		Buffer vertices;
 		Buffer indexBuffer;
 		int numIndexes;
-		SamplerState sampler;
-		ShaderResourceView textureView;
+		//SamplerState sampler;
+		List<ShaderResourceView> textureView = new List<ShaderResourceView>();
 
 		public Mesh()
 		{
@@ -262,7 +262,7 @@ namespace Galaxies
 					VertexPNT v0 = new VertexPNT();
 					v0._pos = SphericalCoord(pos * radScale, out posXYZ);
 					v0.normal = posXYZ.Normalize();
-					v0.uv0 = new float2(-pos.x, pos.y + 0.5f);
+					v0.uv0 = new float2(1.0f-pos.x, pos.y + 0.5f);
 					verts.Add(v0);
 					index++;
 				}
@@ -285,24 +285,28 @@ namespace Galaxies
                 });
 			vertices = Buffer.Create(Global._G.device, BindFlags.VertexBuffer, verts.ToArray());
 
-			SharpDX.Direct3D11.Resource tex = Texture2D.FromFile<Texture2D>(Global._G.device, "world.200401.3x540x270.jpg");
-			//SharpDX.Direct3D11.Resource tex = Texture2D.FromFile<Texture2D>(Global._G.device, @"C:\dev\Globe\Content\Custom\world.200401.3x5400x2700.jpg");
+			//SharpDX.Direct3D11.Resource tex = Texture2D.FromFile<Texture2D>(Global._G.device, @"Content\world.200401.3x540x270.jpg");
+			////SharpDX.Direct3D11.Resource tex = Texture2D.FromFile<Texture2D>(Global._G.device, @"C:\dev\Globe\Content\Custom\world.200401.3x5400x2700.jpg");
+			//textureView = new ShaderResourceView(Global._G.device, tex);
+			//tex.Dispose();
+			textureView.Add(Global._G.texMan.texDict["world.200401.3x540x270"].textureView);
+			//textureView.Add(Global._G.texMan.texDict["world.200407.3x5400x2700"].textureView);
+			//textureView.Add(Global._G.texMan.texDict["world.200408.3x8192x8192"].textureView);
 
-			textureView = new ShaderResourceView(Global._G.device, tex);
-
-			sampler = new SamplerState(Global._G.device, new SamplerStateDescription()
-			{
-				Filter = Filter.Anisotropic,
-				AddressU = TextureAddressMode.Wrap,
-				AddressV = TextureAddressMode.Wrap,
-				AddressW = TextureAddressMode.Wrap,
-				BorderColor = Color.Black,
-				ComparisonFunction = Comparison.Never,		
-				MaximumAnisotropy = 16,
-				MipLodBias = 0,
-				MinimumLod = 0,
-				MaximumLod = 16,
-			});
+			// This is handled the the shader effects file. Maybe someday we can make an override if needed.
+			//sampler = new SamplerState(Global._G.device, new SamplerStateDescription()
+			//{
+			//    Filter = Filter.Anisotropic,
+			//    AddressU = TextureAddressMode.Wrap,
+			//    AddressV = TextureAddressMode.Wrap,
+			//    AddressW = TextureAddressMode.Wrap,
+			//    BorderColor = Color.Black,
+			//    ComparisonFunction = Comparison.Never,
+			//    MaximumAnisotropy = 16,
+			//    MipLodBias = 0,
+			//    MinimumLod = 0,
+			//    MaximumLod = 16,
+			//});
 
 			//			CreateVertexBuffer(faces);
 			//		m_shader = "simpleGlobeShade";
@@ -338,25 +342,29 @@ namespace Galaxies
 			Global._G.context.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding(vertices, lamez, 0));
 			Global._G.context.InputAssembler.SetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
 
-			EffectPass pass = Global._G.technique.GetPassByIndex(0);
-			pass.Apply(Global._G.context);
-			Global._G.context.VertexShader.SetConstantBuffer(0, Global._G.constantBuffer);
-			Global._G.context.PixelShader.SetConstantBuffer(0, Global._G.constantBuffer);
-			//Global._G.pass
-			//Global._G.dxState.VertexShader.Set(Global._G.vertexShader);
-			//Global._G.dxState.PixelShader.Set(Global._G.pixelShader);
-			Global._G.context.PixelShader.SetSampler(0, sampler);
-			Global._G.context.PixelShader.SetShaderResource(0, textureView);
-			//Global._G.dxState.Draw(36, 0);
-			Global._G.context.DrawIndexed(numIndexes, 0, 0);
+			int numPasses = Global._G.technique.Description.PassCount;
+			for (int count = 0; count < numPasses; count++)
+			{
+				EffectPass pass = Global._G.technique.GetPassByIndex(count);
+				pass.Apply(Global._G.context);
+				Global._G.context.VertexShader.SetConstantBuffer(0, Global._G.constantBuffer);
+				Global._G.context.PixelShader.SetConstantBuffer(0, Global._G.constantBuffer);
+				//Global._G.pass
+				//Global._G.dxState.VertexShader.Set(Global._G.vertexShader);
+				//Global._G.dxState.PixelShader.Set(Global._G.pixelShader);
+				//Global._G.context.PixelShader.SetSampler(0, sampler);
+				foreach (var tv in textureView) Global._G.context.PixelShader.SetShaderResource(0, tv);
+				//Global._G.dxState.Draw(36, 0);
+				Global._G.context.DrawIndexed(numIndexes, 0, 0);
+			}
 
-			pass = Global._G.technique.GetPassByIndex(1);
-			pass.Apply(Global._G.context);
-			Global._G.context.VertexShader.SetConstantBuffer(0, Global._G.constantBuffer);
-			Global._G.context.PixelShader.SetConstantBuffer(0, Global._G.constantBuffer);
-			Global._G.context.PixelShader.SetSampler(0, sampler);
-			Global._G.context.PixelShader.SetShaderResource(0, textureView);
-			Global._G.context.DrawIndexed(numIndexes, 0, 0);
+			//pass = Global._G.technique.GetPassByIndex(1);
+			//pass.Apply(Global._G.context);
+			//Global._G.context.VertexShader.SetConstantBuffer(0, Global._G.constantBuffer);
+			//Global._G.context.PixelShader.SetConstantBuffer(0, Global._G.constantBuffer);
+			////Global._G.context.PixelShader.SetSampler(0, sampler);
+			//foreach (var tv in textureView) Global._G.context.PixelShader.SetShaderResource(0, tv);
+			//Global._G.context.DrawIndexed(numIndexes, 0, 0);
 		}
 
 	}

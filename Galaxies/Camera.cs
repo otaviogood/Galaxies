@@ -21,7 +21,7 @@ namespace Galaxies
 		public float viewWidth = 1280.0f;
 		public float viewHeight = 720.0f;
 		public float farClip = 1000.0f;
-		public float nearClip = 0.1f;
+		public float nearClip = 0.01f;
 		public float fovAngle = (float)Math.PI / 4.0f;
 
 		public Camera(float aspect, int tempWidth, int tempHeight)
@@ -32,6 +32,13 @@ namespace Galaxies
 			m_cameraPos = new float3(0, 0, -3);
 			m_cameraLookat = new float3(0, 0, 0);
 			m_cameraUp = new float3(0, 1, 0);
+		}
+
+		public void Resize(float aspect, int tempWidth, int tempHeight)
+		{
+			viewWidth = tempWidth;
+			viewHeight = tempHeight;
+			aspectRatio = aspect;
 		}
 
 		public void SetupCamera()

@@ -19,11 +19,13 @@ namespace Galaxies
         private static void Main()
         {
             RenderForm form = new RenderForm("Galaxies - test");
-			form.ClientSize = new System.Drawing.Size(800, 800);
+			Global._G.form = form;
+			form.ClientSize = new System.Drawing.Size(1280, 720);// 2540, 1550);
 			form.MouseDown += new System.Windows.Forms.MouseEventHandler(form_MouseDown);
 			form.MouseUp += new System.Windows.Forms.MouseEventHandler(form_MouseUp);
 			form.MouseMove += new System.Windows.Forms.MouseEventHandler(form_MouseMove);
 			form.MouseWheel += new System.Windows.Forms.MouseEventHandler(form_MouseWheel);
+			form.Resize += new EventHandler(form_Resize);
 
 			Global._G.camera = new Camera(1, form.ClientSize.Width, form.ClientSize.Height);
 #if DEBUG
@@ -70,6 +72,11 @@ namespace Galaxies
 
 			// Release all resources
 			Global._G.ShutdownDX();
+		}
+
+		static void form_Resize(object sender, EventArgs e)
+		{
+			Global._G.camera.Resize(1, Global._G.form.ClientSize.Width, Global._G.form.ClientSize.Height);
 		}
 
 		static void form_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
