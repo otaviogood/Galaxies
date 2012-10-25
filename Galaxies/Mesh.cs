@@ -30,7 +30,8 @@ namespace Galaxies
 		Buffer indexBuffer;
 		int numIndexes;
 		//SamplerState sampler;
-		List<ShaderResourceView> textureView = new List<ShaderResourceView>();
+		//List<ShaderResourceView> textureView = new List<ShaderResourceView>();
+		ShaderResourceView[] textureView;
 
 		public Mesh()
 		{
@@ -289,9 +290,14 @@ namespace Galaxies
 			////SharpDX.Direct3D11.Resource tex = Texture2D.FromFile<Texture2D>(Global._G.device, @"C:\dev\Globe\Content\Custom\world.200401.3x5400x2700.jpg");
 			//textureView = new ShaderResourceView(Global._G.device, tex);
 			//tex.Dispose();
-			textureView.Add(Global._G.texMan.texDict["world.200401.3x540x270"].textureView);
-			//textureView.Add(Global._G.texMan.texDict["world.200407.3x5400x2700"].textureView);
-			//textureView.Add(Global._G.texMan.texDict["world.200408.3x8192x8192"].textureView);
+			textureView = new ShaderResourceView[] {
+				Global._G.texMan.texDict["world.200401.3x540x270"].textureView,
+				//Global._G.texMan.texDict["world.200408.3x8192x8192"].textureView,
+				Global._G.texMan.texDict["noiseRGBA"].textureView,
+				Global._G.texMan.texDict["cloud_combined_1024"].textureView
+			};
+
+
 
 			// This is handled the the shader effects file. Maybe someday we can make an override if needed.
 			//sampler = new SamplerState(Global._G.device, new SamplerStateDescription()
@@ -349,22 +355,12 @@ namespace Galaxies
 				pass.Apply(Global._G.context);
 				Global._G.context.VertexShader.SetConstantBuffer(0, Global._G.constantBuffer);
 				Global._G.context.PixelShader.SetConstantBuffer(0, Global._G.constantBuffer);
-				//Global._G.pass
 				//Global._G.dxState.VertexShader.Set(Global._G.vertexShader);
 				//Global._G.dxState.PixelShader.Set(Global._G.pixelShader);
 				//Global._G.context.PixelShader.SetSampler(0, sampler);
-				foreach (var tv in textureView) Global._G.context.PixelShader.SetShaderResource(0, tv);
-				//Global._G.dxState.Draw(36, 0);
+				Global._G.context.PixelShader.SetShaderResources(0, textureView.Length, textureView);
 				Global._G.context.DrawIndexed(numIndexes, 0, 0);
 			}
-
-			//pass = Global._G.technique.GetPassByIndex(1);
-			//pass.Apply(Global._G.context);
-			//Global._G.context.VertexShader.SetConstantBuffer(0, Global._G.constantBuffer);
-			//Global._G.context.PixelShader.SetConstantBuffer(0, Global._G.constantBuffer);
-			////Global._G.context.PixelShader.SetSampler(0, sampler);
-			//foreach (var tv in textureView) Global._G.context.PixelShader.SetShaderResource(0, tv);
-			//Global._G.context.DrawIndexed(numIndexes, 0, 0);
 		}
 
 	}

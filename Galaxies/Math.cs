@@ -1080,22 +1080,22 @@ namespace Otavio.Math
 	// -------------- CODE REVIEWED TO HERE. float2, int2, float3, float4 -----------------------------------------------------
 
 	// a 4x4 matrix
-	sealed public class Matrix
+	sealed public class float4x4
 	{
 		public float[,] m;
 
-		public Matrix()
+		public float4x4()
 		{
 			m = new float[4,4];
 		}
-		public Matrix( float[ ] t )
+		public float4x4( float[ ] t )
 		{
 			m = new float[4,4];
 			for( int r = 0; r < 4; r++ )
 				for( int c = 0; c < 4; c++ )
 					m[ c, r ] = t[ r * 4 + c ];
 		}
-		public Matrix(float3 x, float3 y, float3 z, float3 p)
+		public float4x4(float3 x, float3 y, float3 z, float3 p)
 		{
 			m = new float[4,4];
 			m[0,0] = x.x;
@@ -1115,7 +1115,7 @@ namespace Otavio.Math
 			m[3,2] = p.z;
 			m[3,3] = 1.0f;
 		}
-		public Matrix(float4 x, float4 y, float4 z, float4 p)
+		public float4x4(float4 x, float4 y, float4 z, float4 p)
 		{
 			m = new float[4,4];
 			m[0,0] = x.x;
@@ -1136,7 +1136,7 @@ namespace Otavio.Math
 			m[3,3] = p.w;
 		}
 
-		public Matrix( Quaternion q )
+		public float4x4( Quaternion q )
 		{
 			m = new float[4,4];
 
@@ -1172,9 +1172,9 @@ namespace Otavio.Math
 		}
 
 		// math operators
-		public static Matrix operator*(Matrix a, Matrix b)
+		public static float4x4 operator*(float4x4 a, float4x4 b)
 		{
-			Matrix ret = new Matrix();
+			float4x4 ret = new float4x4();
 			for( int j = 0; j < 4; j++ ) 
 			{
 				for( int i = 0; i < 4; i++ )
@@ -1185,7 +1185,7 @@ namespace Otavio.Math
 			return ret;
 		}
 
-		public static float3 operator*( Matrix a, float3 v )
+		public static float3 operator*( float4x4 a, float3 v )
 		{
 			return new float3( 
 				v.x * a.m[0,0] + v.y * a.m[0,1] + v.z * a.m[0,2] + a.m[0,3],
@@ -1194,9 +1194,9 @@ namespace Otavio.Math
 		}
 
 		// math functions
-		static public Matrix Identity()
+		static public float4x4 Identity()
 		{
-			Matrix ret = new Matrix();
+			float4x4 ret = new float4x4();
 			ret.m[0,0] = 1.0f;
 			ret.m[0,1] = 0.0f;
 			ret.m[0,2] = 0.0f;
@@ -1215,65 +1215,65 @@ namespace Otavio.Math
 			ret.m[3,3] = 1.0f;
 			return ret;
 		}
-		public Matrix Inverse()
+		public float4x4 Inverse()
 		{
-			Matrix ret = new Matrix();
+			float4x4 ret = new float4x4();
 			return ret;
 		}
-		public Matrix OrthogonalInverse()
+		public float4x4 OrthogonalInverse()
 		{
-			Matrix ret = new Matrix();
+			float4x4 ret = new float4x4();
 			return ret;
 		}
-		public Matrix Scale(float3 v)
+		public float4x4 Scale(float3 v)
 		{
 			return Scale(v.x, v.y, v.z);
 		}
-		public Matrix Scale(float x, float y, float z)
+		public float4x4 Scale(float x, float y, float z)
 		{
-			Matrix s = Identity();
+			float4x4 s = Identity();
 			s.m[0,0] = x;
 			s.m[1,1] = y;
 			s.m[2,2] = z;
 			return this * s;
 		}
-		public Matrix Translate(float3 v)
+		public float4x4 Translate(float3 v)
 		{
 			return Translate(v.x, v.y, v.z);
 		}
-		public Matrix Translate(float x, float y, float z)
+		public float4x4 Translate(float x, float y, float z)
 		{
-			Matrix t = Identity();
+			float4x4 t = Identity();
 			t.m[0,3] = x;
 			t.m[1,3] = y;
 			t.m[2,3] = z;
 			return this * t;
 		}
-		public Matrix Rotate(float3 axis, float radians)
+		public float4x4 Rotate(float3 axis, float radians)
 		{
 			return Rotate(axis.x, axis.y, axis.z, radians);
 		}
-		public Matrix Rotate(float x, float y, float z, float radians)
+		public float4x4 Rotate(float x, float y, float z, float radians)
 		{
-			Matrix ret = Identity();
+			float4x4 ret = Identity();
 			return ret;
 		}
-		public Matrix RotateX(float radians)
+		public float4x4 RotateX(float radians)
 		{
-			Matrix ret = Identity();
+			float4x4 ret = Identity();
 			return ret;
 		}
-		public Matrix RotateY(float radians)
+		public float4x4 RotateY(float radians)
 		{
-			Matrix ret = Identity();
+			float4x4 ret = Identity();
 			return ret;
 		}
-		public Matrix RotateZ(float radians)
+		public float4x4 RotateZ(float radians)
 		{
-			Matrix ret = Identity();
+			float4x4 ret = Identity();
 			return ret;
 		}
-		public Matrix OrthogonalBasis(float3 zaxis)
+		public float4x4 OrthogonalBasis(float3 zaxis)
 		{
 			// from PBRT p54
 			float3 basisU;
@@ -1289,7 +1289,7 @@ namespace Otavio.Math
 			}
 			float3 basisV = zaxis.Cross(basisU);
 
-			Matrix ret = Identity();
+			float4x4 ret = Identity();
 			ret.m[0,0] = basisU.x;
 			ret.m[0,1] = basisU.y;
 			ret.m[0,2] = basisU.z;
@@ -1302,9 +1302,9 @@ namespace Otavio.Math
 
 			return ret;
 		}
-		public Matrix OrthogonalBasis(float3 zaxis, float3 yaxis)
+		public float4x4 OrthogonalBasis(float3 zaxis, float3 yaxis)
 		{
-			Matrix ret = Identity();
+			float4x4 ret = Identity();
 			return ret;
 		}
 	}
@@ -1400,58 +1400,6 @@ namespace Otavio.Math
 		public float y;
 		public float z;
 		public float w;
-	}
-
-	public struct Color4f
-	{
-		public float r;
-		public float g;
-		public float b;
-		public float a;
-
-		public override bool Equals(object obj)
-		{
-			Color4f other = ( Color4f )obj;
-			return other.r == r && other.g == g && other.b == b && other.a == a;
-		}
-
-		public override int GetHashCode()
-		{
-			return r.GetHashCode( ) | g.GetHashCode( ) | b.GetHashCode( ) | a.GetHashCode( );
-		}
-
-		public Color4f(float _r, float _g, float _b, float _a)
-		{
-			r = _r;
-			g = _g;
-			b = _b;
-			a = _a;
-		}
-
-		public static bool operator>(Color4f a, Color4f b)
-		{
-			return ((a.r > b.r) && (a.g > b.g) && (a.b > b.b) && (a.a > b.a));
-		}
-		public static bool operator>=(Color4f a, Color4f b)
-		{
-			return ((a.r >= b.r) && (a.g >= b.g) && (a.b >= b.b) && (a.a >= b.a));
-		}
-		public static bool operator<(Color4f a, Color4f b)
-		{
-			return ((a.r < b.r) && (a.g < b.g) && (a.b < b.b) && (a.a < b.a));
-		}
-		public static bool operator<=(Color4f a, Color4f b)
-		{
-			return ((a.r <= b.r) && (a.g <= b.g) && (a.b <= b.b) && (a.a <= b.a));
-		}
-		public static bool operator==(Color4f a, Color4f b)
-		{
-			return ((a.r == b.r) && (a.g == b.g) && (a.b == b.b) && (a.a == b.a));
-		}
-		public static bool operator!=(Color4f a, Color4f b)
-		{
-			return ((a.r != b.r) || (a.g != b.g) || (a.b != b.b) || (a.a != b.a));
-		}
 	}
 
 	public struct float3x3

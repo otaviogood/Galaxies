@@ -21,6 +21,7 @@ namespace Galaxies
 			string[] allfiles = Directory.GetFiles(@"Content", "*.png");
 			allfiles = allfiles.Concat(Directory.GetFiles(@"Content", "*.jpg")).ToArray();
 			allfiles = allfiles.Concat(Directory.GetFiles(@"Content", "*.bmp")).ToArray();
+			allfiles = allfiles.Concat(Directory.GetFiles(@"Content", "*.dds")).ToArray();
 			foreach (string s in allfiles)
 			{
 				string chopped = s.Replace(".png", "");

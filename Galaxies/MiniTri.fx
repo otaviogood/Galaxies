@@ -8,8 +8,9 @@ cbuffer MatrixBuffer
 	float4 sunColor;
 }
 //Texture2D txDiffuse : register( t0 );
-Texture2D <float4> txDiffuse;
-SamplerState mySampler;// : register( s0 );
+Texture2D <float4> txDiffuse[3];// : register( t0 );
+//Texture2D <float4> txNoise;// : register( t1 );
+//SamplerState mySampler;// : register( s0 );
 //sampler samLinear;
 
 struct VS_IN
@@ -79,19 +80,20 @@ void IntersectSphereAndRay(float3 pos, float radius, float3 posA, float3 posB, o
 	//return true;
 }
 
-SamplerState samClamp
+SamplerState samWrap
 {
 	//Filter = MIN_MAG_MIP_LINEAR;
 	Filter = ANISOTROPIC;
-	AddressU = Clamp;
-	AddressV = Clamp;
+	AddressU = Wrap;
+	AddressV = Wrap;
 };
 
 float4 PS2( PS_IN input ) : SV_Target
 {
 	//float3 tex = txDiffuse.Sample( mySampler, input.tex ).xyz;
-	float3 tex = txDiffuse.Sample( samClamp, input.tex ).xyz;
+	//float3 tex = txDiffuse.Sample( samWrap, input.tex ).xyz;
 	//return float4(tex.x, tex.y, tex.z, 0.5);
+	//float3 clouds = pow(txDiffuse[2].Sample( samWrap, input.tex ).xyz, 2);
 	float3 camTrans = mul(cameraPos, transpose(worldMat)).xyz;
 	float3 eyeVec = normalize(input.worldPos - camTrans.xyz);
 	float3 intersectA, intersectB;
@@ -99,12 +101,13 @@ float4 PS2( PS_IN input ) : SV_Target
 	float3 innerA, innerB;
 	IntersectSphereAndRay(float3(0,0,0), 1.0f, camTrans.xyz, camTrans.xyz + eyeVec, innerA, innerB);
 	float3 light = dot(input.normal, sunPos.xyz) * sunColor.xyz;
-	float3 finalColor = float3(0.3f, 0.6f, 1.0f) * light;
+	float3 finalColor = (float3(0.05f, 0.25f, 1.0f)) * light;
 	float alpha = length(intersectA-intersectB) - length(innerA-innerB);// - length(innerA-innerB);//*0.5f;
 	//float alpha = length(innerA-innerB);//*0.5f;
 //finalColor = alpha.xxx-0.5f;
 //alpha = 1;
 	finalColor *= 0.5f;
+	finalColor = sqrt(finalColor);
 	return float4(finalColor.x, finalColor.y, finalColor.z, alpha);
 }
 
@@ -112,10 +115,12 @@ float4 PS( PS_IN input ) : SV_Target
 {
 	float3 light = dot(input.normal, sunPos.xyz) * sunColor.xyz;
 	//float3 tex = txDiffuse.Sample( mySampler, input.tex ).xyz;
-	float3 tex = txDiffuse.Sample( samClamp, input.tex ).xyz;
+	float3 tex = pow(txDiffuse[0].Sample( samWrap, input.tex ).xyz, 2);
+	float3 clouds = pow(txDiffuse[2].Sample( samWrap, input.tex ).xyz, 2);
 	//float3 finalColor = float3(0.3f, 0.6f, 0.99f) * tex;// * light;
-	float3 finalColor = lerp(float3(0.3f, 0.6f, 1.0f), tex, 0.9f) * light;
+	float3 finalColor = lerp(float3(0.05f, 0.25f, 1.0f), tex * 0.75 + clouds, 0.95f) * light;
 	finalColor *= 0.5f;
+	finalColor = sqrt(finalColor);
 	return float4(finalColor.x, finalColor.y, finalColor.z, 1.0f);
 }
 
