@@ -30,8 +30,8 @@ namespace Galaxies
 		Buffer indexBuffer;
 		int numIndexes;
 		//SamplerState sampler;
-		//List<ShaderResourceView> textureView = new List<ShaderResourceView>();
 		ShaderResourceView[] textureView;
+		public EffectTechnique technique;
 
 		public Mesh()
 		{
@@ -154,88 +154,6 @@ namespace Galaxies
 			return pos;// *finalR;
 		}
 
-/*		public void MakeLatLonSphere(int latDivs, int lonDivs)
-		{
-			List<VertexPNT> verts = new List<VertexPNT>();
-			for (int lat = -latDivs / 2; lat < latDivs / 2; lat++)
-			{
-				for (int lon = 0; lon < lonDivs; lon++)
-				{
-					float2 pos = new float2((float)lon / lonDivs, (float)lat / latDivs);
-					float2 posO = new float2((float)(lon + 1) / lonDivs, (float)lat / latDivs);
-					float2 posA = new float2((float)lon / lonDivs, ((float)lat + 1) / latDivs);
-					float2 posAO = new float2(((float)lon + 1) / lonDivs, ((float)lat + 1) / latDivs);
-					float2 radScale = new float2((float)(2 * Math.PI), (float)(Math.PI));
-					//pos *= radScale;
-					//posO *= radScale;
-					//posA *= radScale;
-					//posAO *= radScale;
-
-					float3 posXYZ = new float3();
-					VertexPNT v0 = new VertexPNT();
-					v0._pos = SphericalCoord(pos * radScale, out posXYZ);
-					v0.normal = posXYZ.Normalize();
-					v0.uv0 = pos +new float2(0, 0.5f);
-					verts.Add(v0);
-
-					VertexPNT v1 = new VertexPNT();
-					v1._pos = SphericalCoord(posA * radScale, out posXYZ);
-					v1.normal = posXYZ.Normalize();
-					v1.uv0 = posO +new float2(0, 0.5f);
-					verts.Add(v1);
-
-					VertexPNT v2 = new VertexPNT();
-					v2._pos = SphericalCoord(posO * radScale, out posXYZ);
-					v2.normal = posXYZ.Normalize();
-					v2.uv0 = posA +new float2(0, 0.5f);
-					verts.Add(v2);
-
-					VertexPNT v3 = new VertexPNT();
-					v3._pos = SphericalCoord(posAO * radScale, out posXYZ);
-					v3.normal = posXYZ.Normalize();
-					v3.uv0 = posAO +new float2(0, 0.5f);
-					verts.Add(v3);
-					verts.Add(v2);
-					verts.Add(v1);
-				}
-			}
-
-			int[] faceList = GenerateDefaultFaceList(verts);
-			indexBuffer = Buffer.Create(Global._G.device, BindFlags.IndexBuffer, faceList);
-			numIndexes = faceList.Length;
-
-			ShaderSignature sig = ShaderSignature.GetInputSignature(Global._G.vertexShaderByteCode);
-			layout = new InputLayout(Global._G.device, sig, new[]
-                {
-                    new InputElement("POSITION", 0, Format.R32G32B32_Float, 0, 0),
-                    new InputElement("NORMAL", 0, Format.R32G32B32_Float, 12, 0),
-					new InputElement("TEXCOORD", 0, Format.R32G32_Float, 12+12, 0)
-					//new InputElement("COLOR", 0, Format.R32G32B32A32_Float, 16, 0),
-					//new InputElement("TEXCOORD", 0, Format.R32G32B32A32_Float, 32, 0)
-                });
-			vertices = Buffer.Create(Global._G.device, BindFlags.VertexBuffer, verts.ToArray());
-
-			SharpDX.Direct3D11.Resource tex = Texture2D.FromFile<Texture2D>(Global._G.device, "world.200401.3x540x270.jpg");
-			textureView = new ShaderResourceView(Global._G.device, tex);
-
-			sampler = new SamplerState(Global._G.device, new SamplerStateDescription()
-			{
-				Filter = Filter.MinMagMipLinear,
-				AddressU = TextureAddressMode.Wrap,
-				AddressV = TextureAddressMode.Wrap,
-				AddressW = TextureAddressMode.Wrap,
-				BorderColor = Color.Black,
-				ComparisonFunction = Comparison.Never,
-				MaximumAnisotropy = 16,
-				MipLodBias = 0,
-				MinimumLod = 0,
-				MaximumLod = 16,
-			});
-
-//			CreateVertexBuffer(faces);
-	//		m_shader = "simpleGlobeShade";
-		}*/
-
 		public void MakeLatLonSphere2(int latDivs, int lonDivs)
 		{
 			List<VertexPNT> verts = new List<VertexPNT>();
@@ -274,7 +192,9 @@ namespace Galaxies
 			numIndexes = faceList.Length;
 
 			//public EffectPass pass;
-			EffectPass pass = Global._G.technique.GetPassByIndex(0);
+			//EffectTechnique technique = effect.GetTechniqueByIndex(0);
+			technique = Global._G.effect.GetTechniqueByName("EarthRender");
+			EffectPass pass = technique.GetPassByIndex(0);
 			var passSignature = pass.Description.Signature;
 			layout = new InputLayout(Global._G.device, passSignature, new[]
 			//ShaderSignature sig = ShaderSignature.GetInputSignature(Global._G.vertexShaderByteCode);
@@ -292,6 +212,7 @@ namespace Galaxies
 			//tex.Dispose();
 			textureView = new ShaderResourceView[] {
 				Global._G.texMan.texDict["world.200401.3x540x270"].textureView,
+				//Global._G.texMan.texDict["world.200407.3x5400x2700"].textureView,
 				//Global._G.texMan.texDict["world.200408.3x8192x8192"].textureView,
 				Global._G.texMan.texDict["noiseRGBA"].textureView,
 				Global._G.texMan.texDict["cloud_combined_1024"].textureView
@@ -348,10 +269,10 @@ namespace Galaxies
 			Global._G.context.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding(vertices, lamez, 0));
 			Global._G.context.InputAssembler.SetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
 
-			int numPasses = Global._G.technique.Description.PassCount;
+			int numPasses = technique.Description.PassCount;
 			for (int count = 0; count < numPasses; count++)
 			{
-				EffectPass pass = Global._G.technique.GetPassByIndex(count);
+				EffectPass pass = technique.GetPassByIndex(count);
 				pass.Apply(Global._G.context);
 				Global._G.context.VertexShader.SetConstantBuffer(0, Global._G.constantBuffer);
 				Global._G.context.PixelShader.SetConstantBuffer(0, Global._G.constantBuffer);

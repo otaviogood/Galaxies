@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,6 +19,7 @@ namespace Galaxies
 
 		public TextureManager()
 		{
+			DateTime dt = DateTime.Now;
 			string[] allfiles = Directory.GetFiles(@"Content", "*.png");
 			allfiles = allfiles.Concat(Directory.GetFiles(@"Content", "*.jpg")).ToArray();
 			allfiles = allfiles.Concat(Directory.GetFiles(@"Content", "*.bmp")).ToArray();
@@ -42,6 +44,13 @@ namespace Galaxies
 				tex.Dispose();
 				texDict.Add(chopped, texTemp);
 			}
+			Debug.WriteLine("Texture manager load time: " + (DateTime.Now - dt).TotalMilliseconds);
+			// time to load 8192x8192:
+			// jpg (high compression)			2.5 sec		9.37MB
+			// png 24 bit						3.8 sec		36.3MB
+			// bmp 24 bit						2.3 sec		192MB
+			// dds R8G8B8						3.5 sec		30.6MB
+			// dds dxt1							3.5 sec		32.0MB
 		}
 	}
 }

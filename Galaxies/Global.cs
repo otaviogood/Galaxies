@@ -20,8 +20,9 @@ namespace Galaxies
 		public Matrix view;
 		public Matrix proj;
 		public Vector4 cameraPos;
-		public Vector4 sunPos;
+		public Vector4 sunDir;
 		public Vector4 sunColor;
+		public Vector4 atmosphereColorAndRadius;
 	}
 
 	public sealed class Global
@@ -44,7 +45,6 @@ namespace Galaxies
 
 		// effects
 		public Effect effect;
-		public EffectTechnique technique;
 
 		public ShaderParamStruct shaderParams;
 
@@ -96,8 +96,6 @@ namespace Galaxies
             CompilationResult effectByteCode = ShaderBytecode.CompileFromFile("MiniTri.fx", "fx_5_0", ShaderFlags.None, EffectFlags.None);
 #endif
             effect = new Effect(device, effectByteCode);
-			//EffectTechnique technique = effect.GetTechniqueByIndex(0);
-			technique = effect.GetTechniqueByName("Render");
 			// Compile Vertex and Pixel shaders
 			//vertexShaderByteCode = ShaderBytecode.CompileFromFile("MiniTri.fx", "VS", "vs_5_0");
 			//vertexShader = new VertexShader(device, vertexShaderByteCode);

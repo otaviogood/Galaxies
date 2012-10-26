@@ -21,6 +21,7 @@ namespace Galaxies
             RenderForm form = new RenderForm("Galaxies - test");
 			Global._G.form = form;
 			form.ClientSize = new System.Drawing.Size(1280, 720);// 2540, 1550);
+			//form.ClientSize = new System.Drawing.Size(2540, 1550);
 			form.MouseDown += new System.Windows.Forms.MouseEventHandler(form_MouseDown);
 			form.MouseUp += new System.Windows.Forms.MouseEventHandler(form_MouseUp);
 			form.MouseMove += new System.Windows.Forms.MouseEventHandler(form_MouseMove);
@@ -41,8 +42,8 @@ namespace Galaxies
 			Global._G.context.Rasterizer.SetViewports(new Viewport(0, 0, form.ClientSize.Width, form.ClientSize.Height, 0.0f, 1.0f));
 			Global._G.context.OutputMerger.SetTargets(Global._G.depthView, Global._G.renderView);
 
-			Global._G.shaderParams.sunPos = new Vector4(Vector3.Normalize(new Vector3(1, 1, -1)), 1);
-			Global._G.shaderParams.sunColor = new Vector4(5, 4.7f, 3.75f, 1);
+			Global._G.shaderParams.sunDir = new Vector4(Vector3.Normalize(new Vector3(-1, -1, 1)), 1);
+			Global._G.shaderParams.sunColor = new Vector4(5.25f, 4.0f, 2.75f, 1);
 			Global._G.camera.SetupCamera();
 
 
@@ -59,7 +60,7 @@ namespace Galaxies
 				Global._G.context.ClearDepthStencilView(Global._G.depthView, DepthStencilClearFlags.Depth, 1.0f, 0);
 				Global._G.context.ClearRenderTargetView(Global._G.renderView, SharpDX.Color.Black);
 
-				Global._G.shaderParams.world = Matrix.Identity;// Matrix.RotationX(time) * Matrix.RotationY(time * 2) * Matrix.RotationZ(time * .7f);
+				Global._G.shaderParams.world = Matrix.RotationY(time * 0.02f);// Matrix.Identity;// Matrix.RotationX(time) * Matrix.RotationY(time * 2) * Matrix.RotationZ(time * .7f);
 				Global._G.shaderParams.world.Transpose();
 				Global._G.context.UpdateSubresource(ref Global._G.shaderParams, Global._G.constantBuffer);
 
