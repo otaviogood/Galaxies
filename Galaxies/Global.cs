@@ -11,6 +11,7 @@ using SharpDX.Windows;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Device = SharpDX.Direct3D11.Device;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
+using System.IO;
 
 namespace Galaxies
 {
@@ -89,13 +90,15 @@ namespace Galaxies
 			backBuffer = Texture2D.FromSwapChain<Texture2D>(swapChain, 0);
 			renderView = new RenderTargetView(device, backBuffer);
 
-			//// Compile Vertex and Pixel shaders
-#if DEBUG
-            CompilationResult effectByteCode = ShaderBytecode.CompileFromFile("MiniTri.fx", "fx_5_0", ShaderFlags.Debug | ShaderFlags.SkipOptimization | ShaderFlags.WarningsAreErrors /*| ShaderFlags.ForcePsSoftwareNoOpt*/, EffectFlags.None);
-#else
-            CompilationResult effectByteCode = ShaderBytecode.CompileFromFile("MiniTri.fx", "fx_5_0", ShaderFlags.None, EffectFlags.None);
-#endif
-            effect = new Effect(device, effectByteCode);
+			LoadShaders();
+
+			FileSystemWatcher watcher = new FileSystemWatcher(@"\dev\Galaxies\Galaxies\", "*.fx");
+			watcher.NotifyFilter = NotifyFilters.LastWrite;
+			watcher.Changed += new FileSystemEventHandler(Watcher_Changed);
+			watcher.EnableRaisingEvents = true;
+
+
+
 			// Compile Vertex and Pixel shaders
 			//vertexShaderByteCode = ShaderBytecode.CompileFromFile("MiniTri.fx", "VS", "vs_5_0");
 			//vertexShader = new VertexShader(device, vertexShaderByteCode);
@@ -154,6 +157,25 @@ namespace Galaxies
 			context.Dispose();
 			swapChain.Dispose();
 			factory.Dispose();
+		}
+
+		private void LoadShaders()
+		{
+			//// Compile Vertex and Pixel shaders
+#if DEBUG
+			CompilationResult effectByteCode = ShaderBytecode.CompileFromFile("MiniTri.fx", "fx_5_0", ShaderFlags.Debug | ShaderFlags.SkipOptimization | ShaderFlags.WarningsAreErrors /*| ShaderFlags.ForcePsSoftwareNoOpt*/, EffectFlags.None);
+#else
+            CompilationResult effectByteCode = ShaderBytecode.CompileFromFile("MiniTri.fx", "fx_5_0", ShaderFlags.None, EffectFlags.None);
+#endif
+			effect = new Effect(device, effectByteCode);
+		}
+
+		private void Watcher_Changed(object source, FileSystemEventArgs e)
+		{
+			// Specify what is done when a file is changed, created, or deleted.
+			Console.WriteLine("File changed, loading shaders: " + e.FullPath + " " + e.ChangeType);
+			Debug.WriteLine("File changed, loading shaders: " + e.FullPath + " " + e.ChangeType);
+			LoadShaders();
 		}
 
 	}

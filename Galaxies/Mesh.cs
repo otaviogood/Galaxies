@@ -32,6 +32,7 @@ namespace Galaxies
 		//SamplerState sampler;
 		ShaderResourceView[] textureView;
 		public EffectTechnique technique;
+		string shaderName;
 
 		public Mesh()
 		{
@@ -193,7 +194,8 @@ namespace Galaxies
 
 			//public EffectPass pass;
 			//EffectTechnique technique = effect.GetTechniqueByIndex(0);
-			technique = Global._G.effect.GetTechniqueByName("EarthRender");
+			shaderName = "EarthRender";
+			technique = Global._G.effect.GetTechniqueByName(shaderName);
 			EffectPass pass = technique.GetPassByIndex(0);
 			var passSignature = pass.Description.Signature;
 			layout = new InputLayout(Global._G.device, passSignature, new[]
@@ -269,6 +271,9 @@ namespace Galaxies
 			Global._G.context.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding(vertices, lamez, 0));
 			Global._G.context.InputAssembler.SetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
 
+#if DEBUG
+			technique = Global._G.effect.GetTechniqueByName(shaderName);	// Realtime update shaders if file was changed
+#endif
 			int numPasses = technique.Description.PassCount;
 			for (int count = 0; count < numPasses; count++)
 			{

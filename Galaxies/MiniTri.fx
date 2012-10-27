@@ -49,7 +49,7 @@ PS_IN AtmosphereVS( VS_IN input )
 {
 	PS_IN output = (PS_IN)0;
 	//input.pos.w = 1.0f;
-	float scale = 1.02f;
+	float scale = 1.04f;
 	//output.pos = mul( float4(input.pos.x*scale, input.pos.y*scale, input.pos.z*scale, 1), worldMat );
 	output.pos = mul( float4(input.pos.x*scale, input.pos.y*scale, input.pos.z*scale, 1), worldMat );
 	output.pos = mul( output.pos, viewMat );
@@ -114,8 +114,8 @@ float4 EarthSurfacePS( PS_IN input ) : SV_Target
 	//tex.b = saturate(tex.b-218);
 	float3 clouds = pow(txDiffuse[2].Sample( samWrapAniso, input.tex ).xyz, 2);
 	//float3 finalColor = float3(0.3f, 0.6f, 0.99f) * tex;// * light;
-	float edgeGlow = pow(saturate(1.0f-dot(-eyeVec, normal)), 2.0f)*0.07f+0.93f;
-	float3 finalColor = lerp(float3(0.05f, 0.25f, 1.0f), tex * 0.75 + clouds, edgeGlow) * light;//0.975
+	float edgeGlow = pow(saturate(1.0f-dot(-eyeVec, normal)), 2.0f)*0.4f + 0.6f;// *0.13f+0.87f;
+	float3 finalColor = lerp(tex * 0.75 + clouds, float3(0.05f, 0.25f, 1.0f)*0.15f, edgeGlow) * light;//0.975
 	finalColor *= 0.5f;
 	float4 noise = txDiffuse[1].Sample(samWrapAniso, input.tex*float2(8,8)).xyzw;
 	float grayNoise = lerp(dot(noise.xyzw, float4(1,2,4,0)).x, 1, 0.9f);
@@ -135,18 +135,21 @@ float4 AtmospherePS( PS_IN input ) : SV_Target
 	float3 camTrans = mul(cameraPos.xyz, transpose((float3x3)worldMat)).xyz;
 	float3 eyeVec = normalize(input.worldPos - camTrans.xyz);
 	float3 intersectA, intersectB;
-	IntersectSphereAndRay(float3(0,0,0), 1.02f, camTrans.xyz, camTrans.xyz + eyeVec, intersectA, intersectB);
+	IntersectSphereAndRay(float3(0,0,0), 1.04f, camTrans.xyz, camTrans.xyz + eyeVec, intersectA, intersectB);
 	float3 innerA, innerB;
 	IntersectSphereAndRay(float3(0,0,0), 1.0f, camTrans.xyz, camTrans.xyz + eyeVec, innerA, innerB);
 	float3 sunTrans = mul(sunDir.xyz, transpose((float3x3)worldMat)).xyz;
 	float3 light = dot(input.normal, -sunTrans.xyz) * sunColor.xyz;
 	float3 finalColor = (float3(0.05f, 0.25f, 1.0f)) * light;
-	float alpha = length(intersectA-intersectB) - length(innerA-innerB);// - length(innerA-innerB);//*0.5f;
+	float alpha = length(intersectA-intersectB) - length(innerA-innerB);
+	//if (length(innerA-innerB) > 0.0f) alpha = 0;
 	//alpha = saturate(alpha + saturate(1.0f-dot(-eyeVec, input.normal))*0.4f);
 	//float alpha = length(innerA-innerB);//*0.5f;
+	alpha = pow(alpha, 5.0f);
 //finalColor = alpha.xxx;//-0.5f;
 //alpha = 1;
-	finalColor *= 0.5f;
+	finalColor *= 3.0f;
+	finalColor *= alpha;
 	finalColor = sqrt(finalColor);
 	return float4(finalColor.x, finalColor.y, finalColor.z, alpha);
 }
@@ -162,6 +165,19 @@ BlendState AlphaBlending
 	BlendOp = ADD;
 	SrcBlendAlpha = ONE;
 	DestBlendAlpha = ONE;
+	BlendOpAlpha = ADD;
+	RenderTargetWriteMask[0] = 0x0F;
+};
+
+BlendState AdditiveBlending
+{
+	AlphaToCoverageEnable = FALSE;
+	BlendEnable[0] = TRUE;
+	SrcBlend = ONE;
+	DestBlend = ONE;
+	BlendOp = ADD;
+	SrcBlendAlpha = ONE;
+	DestBlendAlpha = ZERO;
 	BlendOpAlpha = ADD;
 	RenderTargetWriteMask[0] = 0x0F;
 };
@@ -186,7 +202,7 @@ technique11 EarthRender
 	pass P1
 	{
 		//SetBlendState( NoBlending, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
-		SetBlendState( AlphaBlending, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetBlendState( AdditiveBlending, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		//AlphaBlendEnable = true;
 		SetGeometryShader( 0 );
 		SetVertexShader( CompileShader( vs_5_0, AtmosphereVS() ) );

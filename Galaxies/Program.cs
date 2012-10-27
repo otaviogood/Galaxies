@@ -10,6 +10,7 @@ using SharpDX.Windows;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Device = SharpDX.Direct3D11.Device;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
+using System.IO;
 
 namespace Galaxies
 {
@@ -45,7 +46,6 @@ namespace Galaxies
 			Global._G.shaderParams.sunDir = new Vector4(Vector3.Normalize(new Vector3(-1, -1, 1)), 1);
 			Global._G.shaderParams.sunColor = new Vector4(5.25f, 4.0f, 2.75f, 1);
 			Global._G.camera.SetupCamera();
-
 
 			// Use clock
 			var clock = new Stopwatch();
